@@ -1,0 +1,23 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.log
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# PyCharm project files
+.idea/
+
+# OS files
+.DS_Store
+
+# Test results or temporary files
+*.png
+*.jpg
+*.html
+allure-report/
+allure-results/
+*.iml
