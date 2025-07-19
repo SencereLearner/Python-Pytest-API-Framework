@@ -1,7 +1,7 @@
 import sys
 import pytest
 from models.post_response_model import PostResponseModel
-from utils.response_validation import validate_response_schema
+import utils.response_validation
 
 
 TEST_DATA = [
@@ -43,4 +43,4 @@ def test_get_specific_endpoint(get_specific_endpoint_fixture):
 def test_post_schema_validation(create_post_endpoint_fixture):
     payload = {"title": "Hello", "body": "world", "userId": 1}
     create_post_endpoint_fixture.create_new_post(payload)
-    validate_response_schema(create_post_endpoint_fixture.json, PostResponseModel)
+    utils.response_validation.validate_response_schema(create_post_endpoint_fixture.json, PostResponseModel)
