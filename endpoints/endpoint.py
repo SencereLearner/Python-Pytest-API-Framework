@@ -1,8 +1,10 @@
 import allure
 import requests
+import logging
 from pydantic import ValidationError
 from config.config_loader import load_config_data
-
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 class Endpoint:
 
@@ -11,6 +13,20 @@ class Endpoint:
     headers = {'Content-type': 'application/json'}
     config = load_config_data()
 
+    @allure.step('Log response with logger')
+    def log_response_with_logger(self):
+        if self.response:
+            logger.info(f"Status: {self.response.status_code}")
+            logger.info(f"Body: {self.response.text}")
+        else:
+            logger.warning("No response found to log")
+
+    @allure.step('Logging full response with Allure')
+    def log_response_with_allure(self):
+        allure.attach(str(self.response.status_code), name = "Status Code", attachment_type = allure.attachment_type.TEXT)
+        allure.attach(self.response.text, name = "Response Body", attachment_type = allure.attachment_type.JSON)
+        allure.attach(str(self.response.elapsed.total_seconds()), name = "Response Time",
+                      attachment_type = allure.attachment_type.TEXT)
 
     def send_request(self, method, request_id=None, payload=None, headers=None):
         headers = headers if headers else self.headers
@@ -28,6 +44,9 @@ class Endpoint:
                 self.response = requests.delete(url, headers=headers)
             case _:
                 raise ValueError(f"Unsupported HTTP method: {method}")
+
+        self.log_response_with_logger()
+        self.log_response_with_allure()
         self.json = self.response.json()
         return self.response
 
@@ -47,13 +66,6 @@ class Endpoint:
     @allure.step('Check that request returned within 2 seconds')
     def assert_request_returned_within_seconds(self, seconds):
         assert self.response.elapsed.total_seconds() < seconds
-
-    @allure.step('Logging full response')
-    def log_response(self):
-        allure.attach(str(self.response.status_code), name = "Status Code", attachment_type = allure.attachment_type.TEXT)
-        allure.attach(self.response.text, name = "Response Body", attachment_type = allure.attachment_type.JSON)
-        allure.attach(str(self.response.elapsed.total_seconds()), name = "Response Time",
-                      attachment_type = allure.attachment_type.TEXT)
 
     @allure.step('Validating response schema')
     def validate_response_schema(self, model_class):

@@ -7,3 +7,5 @@ def load_config_data(filename='config.yaml') -> dict:
     with open(config_path, 'r') as file:
         config = yaml.safe_load(file)
     return config
+
+print(os.path.dirname(os.path.dirname(__file__)))
