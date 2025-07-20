@@ -13,3 +13,4 @@ Approaches and tools used in the project:
 10. Logging (module for custom logs besides Allure)
 11. OS (module to avoid hardcoding file paths)
 12. Pytest-xdist (for running tests in parallel)
+13. Tenacity (python module for retrying a function on fail)

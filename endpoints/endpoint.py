@@ -3,6 +3,8 @@ import requests
 import logging
 from config.config_loader import load_config_data
 from utils.logger_utility import LoggerUtility
+from tenacity import retry, stop_after_attempt, wait_fixed, before_sleep_log
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -14,7 +16,7 @@ class Endpoint:
     headers = {'Content-type': 'application/json'}
     config = load_config_data()
 
-
+    @retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
     def send_request(self, method, request_id=None, payload=None, headers=None):
         headers = headers if headers else self.headers
         url = f"{self.config['base_url']}/{request_id}" if request_id else self.config['base_url']
@@ -37,22 +39,7 @@ class Endpoint:
         self.json = self.response.json()
         return self.response
 
-    @allure.step('Verifying response title is correct')
-    def assert_response_title_is_correct(self, title):
-        assert self.json['title'] == title
 
-    @allure.step('Verifying response code')
-    def assert_response_code_is(self, expected):
-        actual = self.response.status_code
-        assert actual == expected, f"Expected {expected}, got {actual}"
-
-    @allure.step('Check that response error code is received')
-    def assert_bad_request_code_is_not_200(self):
-        assert self.response.status_code != 200
-
-    @allure.step('Check that request returned within 2 seconds')
-    def assert_request_returned_within_seconds(self, seconds):
-        assert self.response.elapsed.total_seconds() < seconds
 
 
 
